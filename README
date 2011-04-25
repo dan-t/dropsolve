@@ -1,0 +1,2 @@
+Make:
+   ghc --make dropsolve.hs
