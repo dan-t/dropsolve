@@ -10,7 +10,7 @@ Runtime options:
                       into the trash directory.
 
    Move to (T)rash => By pressing 'T' or 't', all conflicting files are
-                      moved into the trash directory (/home/dan/.dropsolve/trash).
+                      moved into the trash directory (<TRASHDIR>).
 
    Show (D)iff     => By pressing 'D' or 'd', the difference between the first
                       and the second conflicting file is shown.
