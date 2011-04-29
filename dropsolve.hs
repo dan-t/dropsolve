@@ -15,6 +15,7 @@ import Control.Monad (when, mapM_, filterM)
 
 main = do
    hSetBuffering stdout NoBuffering
+   hSetBuffering stdin  NoBuffering
    args <- getArgs
    case args of
 	[]            -> printUsage >> printHelp
@@ -99,18 +100,17 @@ handleConflict file = do
       askUser confInfo confFiles = do
 	 putStr "\nTake File (NUM) | Move to (T)rash | Show (D)iff | (S)kip | (Q)uit | (H)elp : " 
 	 char <- getChar
-	 -- catch newline
-	 getChar
 	 let numConfs = length confFiles
+	     askAgain = askUser confInfo confFiles
 	 case toUpper char of
-	      c | c == 'D' && numConfs >= 2             -> showDiff (head confFiles) (confFiles !! 1) >> askUser confInfo confFiles
+	      c | c == 'D' && numConfs >= 2             -> showDiff (head confFiles) (confFiles !! 1) >> askAgain
 	        | c == 'T'                              -> mapM_ (\c -> moveToTrash c) confFiles  
 	        | c == 'S'                              -> return ()
 		| c == 'Q'                              -> exitSuccess
-		| c == 'H'                              -> printHelp
-		| c == '?'                              -> printHelp
+		| c == 'H'                              -> printHelp >> askAgain
+		| c == '?'                              -> printHelp >> askAgain
 		| isDigit c && digitToInt c <= numConfs -> takeFile (digitToInt c) confInfo confFiles
-		| otherwise                             -> askUser confInfo confFiles
+		| otherwise                             -> askAgain
 	 where
 	    moveToTrash file = do
 	       appDir      <- appDirectory
