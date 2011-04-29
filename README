@@ -15,7 +15,7 @@ Runtime options:
    Show (D)iff     => By pressing 'D' or 'd', the difference between the first
                       and the second conflicting file is shown. The diff tool
                       can be specified by the user by setting the environment
-                      variable 'DROPSOLVE_DIFF'. The default diff tool is 'gvimdiff'.
+                      variable 'DROPSOLVE_DIFF'. The default diff tool is 'gvimdiff -f'.
 
    (S)kip          => By pressing 'S' or 's', the current conflict is skipped
                       and the next one is shown.
