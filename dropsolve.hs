@@ -1,6 +1,7 @@
 import System (getArgs)
 import System.Directory
 import System.Posix.Files
+import System.Posix.Env
 import System.IO
 import System.FilePath
 import System.FilePath.Posix
@@ -34,13 +35,15 @@ printHelp = do
    putStrLn $ "   Take File (NUM) => By pressing a digit, the conflicting file with the"
    putStrLn $ "                      digit NUM is used as the new version. A copy of the"
    putStrLn $ "                      current file and the other conflicting files is put"
-   putStrLn $ "                      into the trash directory."
+   putStrLn $ "                      into the trash directory (" ++ trashDir ++ ")."
    putStrLn $ ""
    putStrLn $ "   Move to (T)rash => By pressing 'T' or 't', all conflicting files are"
    putStrLn $ "                      moved into the trash directory (" ++ trashDir ++ ")."
    putStrLn $ ""
    putStrLn $ "   Show (D)iff     => By pressing 'D' or 'd', the difference between the first"
-   putStrLn $ "                      and the second conflicting file is shown."
+   putStrLn $ "                      and the second conflicting file is shown. The diff tool"
+   putStrLn $ "                      can be specified by the user by setting the environment"
+   putStrLn $ "                      variable 'DROPSOLVE_DIFF'. The default diff tool is 'gvimdiff -f'."
    putStrLn $ ""
    putStrLn $ "   (S)kip          => By pressing 'S' or 's', the current conflict is skipped"
    putStrLn $ "                      and the next one is shown."
@@ -135,7 +138,10 @@ handleConflict file = do
 	       mapM_ (\c -> moveToTrash c) confFiles
 
 	    showDiff file1 file2 = do
-	       runCommand $ "gvimdiff -f " ++ quote file1 ++ " " ++ quote file2 ++ ">\& /dev/null"
+	       putStrLn ""
+	       diff <- getEnvDefault "DROPSOLVE_DIFF" "gvimdiff -f"
+	       handle <- runCommand $ diff ++ " " ++ quote file1 ++ " " ++ quote file2
+	       waitForProcess handle
 	       return ()
 
 	    quote string = "\"" ++ string ++ "\""
