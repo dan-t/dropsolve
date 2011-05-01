@@ -1,5 +1,5 @@
-Make:
-   ghc --make dropsolve.hs
+Make and Install:
+   cabal install --prefix=INSTALL_LOCATION dropsolve.cabal
 
 Usage: dropsolve DROPBOXDIR
 

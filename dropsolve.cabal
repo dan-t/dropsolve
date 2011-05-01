@@ -1,0 +1,13 @@
+Name:                dropsolve
+Version:             0.1
+Description:         A command line tool for resolving dropbox conflicts.
+License:             BSD3
+License-file:        LICENSE
+Author:              Daniel Trstenjak
+Maintainer:          daniel.trstenjak@gmail.com
+Build-Type:          Simple
+Cabal-Version:       >=1.2
+
+Executable dropsolve
+  Main-is:           dropsolve.hs
+  Build-Depends:     base >= 3 && < 5, regex-posix == 0.94.*, time == 1.2.*, process == 1.0.*, filepath == 1.2.*, unix == 2.4.*, directory == 1.1.*, haskell98 == 1.1.* 
