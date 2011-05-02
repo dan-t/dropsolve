@@ -137,7 +137,7 @@ handleConflict file = do
 
 	    showDiff file1 file2 = do
 	       putStrLn ""
-	       diff <- getEnvOrDefault "DROPSOLVE_DIFF" "gvimdiff -f"
+	       diff <- getEnvOrDefault "DROPSOLVE_DIFF" defaultDiff
 	       handle <- runCommand $ diff ++ " " ++ quote file1 ++ " " ++ quote file2
 	       waitForProcess handle
 	       return ()
@@ -169,6 +169,8 @@ getDirContents dir = do
 
 appDirectory   = getAppUserDataDirectory "dropsolve"
 trashDirectory = appDirectory >>= \d -> return $ d </> "trash" 
+
+defaultDiff = "gvimdiff -f"
 
 getCurrentDate :: IO (Integer,Int,Int) -- :: (year,month,day)
 getCurrentDate = getCurrentTime >>= return . toGregorian . utctDay
