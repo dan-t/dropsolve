@@ -1,10 +1,11 @@
+{-# LANGUAGE ScopedTypeVariables #-}
+
 import System (getArgs)
 import System.Directory
-import System.Posix.Files
-import System.Posix.Env
 import System.IO
+import System.IO.Error (IOErrorType)
 import System.FilePath
-import System.FilePath.Posix
+import System.Environment
 import System.Process
 import System.Exit
 import Data.Time.Clock
@@ -13,6 +14,7 @@ import Data.List (isInfixOf, isSuffixOf, concat)
 import Data.Char (intToDigit, digitToInt, isDigit, toUpper)
 import Text.Regex.Posix ((=~))
 import Control.Monad (when, mapM_, filterM)
+import Control.Exception.Base (try)
 
 main = do
    hSetBuffering stdout NoBuffering
@@ -54,20 +56,20 @@ printHelp = do
    putStrLn $ ""
 
 resolve file = do
-   exist <- fileExist file
-   when exist $ do
-      fileStatus <- getFileStatus file
-      if isDirectory fileStatus
-	 then do
-	    entries <- getDirContents file
-	    mapM_ (\e -> resolve $ file </> e) entries
-	 else do
-	    when (hasConflict file) $ handleConflict file
+   dirExists <- doesDirectoryExist file
+   if dirExists
+      then do
+	 entries <- getDirContents file
+	 mapM_ (\e -> resolve $ file </> e) entries
+      else do
+	 fileExists <- doesFileExist file
+	 when (fileExists && hasConflict file) $
+	    handleConflict file
 
 hasConflict file = "conflicted copy" `isInfixOf` file
 
 handleConflict file = do
-   exist <- fileExist file
+   exist <- doesFileExist file
    when exist $ do
       let confInfo = conflictInfo file
       confFiles <- findConflicting confInfo
@@ -139,7 +141,7 @@ handleConflict file = do
 
 	    showDiff file1 file2 = do
 	       putStrLn ""
-	       diff <- getEnvDefault "DROPSOLVE_DIFF" "gvimdiff -f"
+	       diff <- getEnvOrDefault "DROPSOLVE_DIFF" "gvimdiff -f"
 	       handle <- runCommand $ diff ++ " " ++ quote file1 ++ " " ++ quote file2
 	       waitForProcess handle
 	       return ()
@@ -174,3 +176,9 @@ trashDirectory = appDirectory >>= \d -> return $ d </> "trash"
 
 getCurrentDate :: IO (Integer,Int,Int) -- :: (year,month,day)
 getCurrentDate = getCurrentTime >>= return . toGregorian . utctDay
+
+getEnvOrDefault envVar defaultValue = do
+   result <- try $ getEnv envVar
+   case result of
+	Right value          -> return value
+	Left  (_ :: IOError) -> return defaultValue
