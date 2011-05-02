@@ -118,12 +118,8 @@ handleConflict file = do
 		| otherwise                             -> askAgain
 	 where
 	    moveToTrash file = do
-	       appDir      <- appDirectory
-	       appDirExist <- doesDirectoryExist appDir
-	       when (not appDirExist) $ createDirectory appDir 
-	       trashDir    <- trashDirectory
-	       trashExist  <- doesDirectoryExist trashDir
-	       when (not trashExist) $ createDirectory trashDir
+	       trashDir <- trashDirectory
+	       createDirectoryIfMissing True trashDir
                let (dir, fileName) = splitFileName file
 	       copyFile file (trashDir </> fileName) 
 	       removeFile file
