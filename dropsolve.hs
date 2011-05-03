@@ -117,12 +117,13 @@ handleConflict file = do
 		| isDigit c && digitToInt c <= numConfs -> takeFile (digitToInt c) confInfo confFiles
 		| otherwise                             -> askAgain
 	 where
-	    moveToTrash file = do
-	       trashDir <- trashDirectory
-	       createDirectoryIfMissing True trashDir
-               let (dir, fileName) = splitFileName file
-	       copyFile file (trashDir </> fileName) 
-	       removeFile file
+	    moveToTrash file =
+	       errorsToStderr $ do 
+		  trashDir <- trashDirectory
+		  createDirectoryIfMissing True trashDir
+		  let (dir, fileName) = splitFileName file
+		  copyFile file (trashDir </> fileName) 
+		  removeFile file
 
 	    takeFile num confInfo confFiles = do
                (year, month, day) <- getCurrentDate
@@ -130,10 +131,11 @@ handleConflict file = do
                    file       = confFiles !! idx
 		   origFile   = dir confInfo </> fileName confInfo
 		   origBackup = origFile ++ "_backup_" ++ show year ++ "-" ++ show month ++ "-" ++ show day
-	       copyFile origFile origBackup
-	       moveToTrash origBackup
-	       copyFile file origFile
-	       mapM_ (\c -> moveToTrash c) confFiles
+	       errorsToStderr $ do
+		  copyFile origFile origBackup
+	          moveToTrash origBackup
+	          copyFile file origFile
+	          mapM_ (\c -> moveToTrash c) confFiles
 
 	    showDiff file1 file2 = do
 	       putStrLn ""
@@ -165,6 +167,11 @@ getDirContents dir = do
    filterM notDots entries
    where
       notDots entry = return . not $ "." `isSuffixOf` entry || ".." `isSuffixOf` entry
+
+
+errorsToStderr :: IO () -> IO ()
+errorsToStderr action =
+   catch action (\e -> hPutStrLn stderr ("\ndropsolve: " ++ show e))
 
 
 appDirectory   = getAppUserDataDirectory "dropsolve"
