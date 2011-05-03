@@ -10,7 +10,7 @@ import System.Process
 import System.Exit
 import Data.Time.Clock
 import Data.Time.Calendar
-import Data.List (isInfixOf, isSuffixOf, concat)
+import Data.List (isInfixOf, isSuffixOf, isPrefixOf, concat)
 import Data.Char (intToDigit, digitToInt, isDigit, toUpper)
 import Text.Regex.Posix ((=~))
 import Control.Monad (when, mapM_, filterM)
@@ -83,7 +83,7 @@ handleConflict file = do
 	 let confs = filter (isConfFile fn) entries
 	 mapM (\e -> return $ d </> e) confs
 	 where
-	    isConfFile file = \e -> file `isInfixOf` e && hasConflict e
+	    isConfFile file = \e -> file `isPrefixOf` e && hasConflict e
 
       resolveConflict confInfo confFiles
 	 | length confFiles == 0 = return ()
