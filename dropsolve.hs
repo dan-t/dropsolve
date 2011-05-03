@@ -171,10 +171,15 @@ getDirContents dir = do
 
 errorsToStderr :: IO () -> IO ()
 errorsToStderr action =
-   catch action (\e -> hPutStrLn stderr ("\ndropsolve: " ++ show e))
+   catch action (\e -> do pn <- normalizedProgName
+			  hPutStrLn stderr ("\n" ++ pn ++ ": " ++ show e))
+
+normalizedProgName = do
+   pn <- getProgName
+   return $ takeWhile (/= '.') pn
 
 
-appDirectory   = getAppUserDataDirectory "dropsolve"
+appDirectory   = normalizedProgName >>= \pn -> getAppUserDataDirectory pn
 trashDirectory = appDirectory >>= \d -> return $ d </> "trash" 
 
 defaultDiff = "gvimdiff -f"
