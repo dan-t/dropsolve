@@ -166,7 +166,7 @@ getDirContents dir = do
    entries <- getDirectoryContents dir
    filterM notDots entries
    where
-      notDots entry = return . not $ "." `isSuffixOf` entry || ".." `isSuffixOf` entry
+      notDots entry = return . not $ "." == entry || ".." == entry
 
 
 errorsToStderr :: IO () -> IO ()
@@ -182,6 +182,7 @@ defaultDiff = "gvimdiff -f"
 getCurrentDate :: IO (Integer,Int,Int) -- :: (year,month,day)
 getCurrentDate = getCurrentTime >>= return . toGregorian . utctDay
 
+getEnvOrDefault :: String -> String -> IO String
 getEnvOrDefault envVar defaultValue = do
    result <- try $ getEnv envVar
    case result of
