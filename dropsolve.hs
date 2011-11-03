@@ -156,10 +156,10 @@ data ConflictInfo = ConflictInfo {
 
 conflictInfo :: FilePath -> ConflictInfo
 conflictInfo filePath =
-   let (_:dir:fileName:host:date:[]) = concat (filePath =~ regex :: [[String]])
-       in ConflictInfo filePath dir fileName host date
+   let (_:dir:fileName:host:date:suffix:[]) = concat (filePath =~ regex :: [[String]])
+       in ConflictInfo filePath dir (fileName ++ suffix) host date
    where
-      regex = "(.*)" </> "(.*) \\((.*) conflicted copy (.*)\\).*"
+      regex = "(.*)" </> "(.*) \\((.*) conflicted copy (.*)\\)(.*)"
 
 
 getDirContents dir = do
