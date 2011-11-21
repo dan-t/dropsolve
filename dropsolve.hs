@@ -88,7 +88,7 @@ handleConflict file = do
       resolveConflict confInfo confFiles
 	 | length confFiles == 0 = return ()
 	 | otherwise = do
-	    let origFile = dir confInfo </> fileName confInfo
+	    let origFile = dir confInfo </> fileName confInfo ++ suffix confInfo
 	    putStrLn $ "\nConflicting file: " ++ origFile
             putConfFiles confFiles 1
 	    askUser confInfo confFiles
@@ -129,7 +129,7 @@ handleConflict file = do
                (year, month, day) <- getCurrentDate
 	       let idx        = num - 1
                    file       = confFiles !! idx
-		   origFile   = dir confInfo </> fileName confInfo
+		   origFile   = dir confInfo </> fileName confInfo ++ suffix confInfo
 		   origBackup = origFile ++ "_backup_" ++ show year ++ "-" ++ show month ++ "-" ++ show day
 	       errorsToStderr $ do
 		  copyFile origFile origBackup
@@ -151,13 +151,14 @@ data ConflictInfo = ConflictInfo {
    filePath :: String,
    dir      :: String,
    fileName :: String,
+   suffix   :: String,
    host     :: String,
    date     :: String }
 
 conflictInfo :: FilePath -> ConflictInfo
 conflictInfo filePath =
    let (_:dir:fileName:host:date:suffix:[]) = concat (filePath =~ regex :: [[String]])
-       in ConflictInfo filePath dir (fileName ++ suffix) host date
+       in ConflictInfo filePath dir fileName suffix host date
    where
       regex = "(.*)" </> "(.*) \\((.*) conflicted copy (.*)\\)(.*)"
 
