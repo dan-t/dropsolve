@@ -16,4 +16,4 @@ source-repository head
 
 Executable dropsolve
   Main-is:       dropsolve.hs
-  Build-Depends: base >= 3 && < 5, regex-posix >= 0.94 && < 0.95, time >= 1.2 && < 1.3, process >= 1.0 && < 1.1, filepath >= 1.2 && < 1.3, directory >= 1.1 && < 1.2, haskell98 >= 1.1 && < 1.2 
+  Build-Depends: base >= 3 && < 5, regex-posix >= 0.94 && < 0.95, time >= 1.2 && < 1.3, process >= 1.0 && < 1.1, filepath >= 1.2 && < 1.3, directory >= 1.1 && < 1.2, haskell98 >= 1.1 && < 1.2, containers >= 0.4 && < 0.5

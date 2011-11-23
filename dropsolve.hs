@@ -10,11 +10,14 @@ import System.Process
 import System.Exit
 import Data.Time.Clock
 import Data.Time.Calendar
-import Data.List (isInfixOf, isSuffixOf, isPrefixOf, concat)
+import Data.List (isInfixOf, isSuffixOf, isPrefixOf, concat, foldr)
 import Data.Char (intToDigit, digitToInt, isDigit, toUpper)
+import Data.Foldable (foldrM)
+import qualified Data.Map as M
 import Text.Regex.Posix ((=~))
 import Control.Monad (when, mapM_, filterM)
 import Control.Exception.Base (try)
+import Foreign.Marshal.Error (void)
 
 main = do
    hSetBuffering stdout NoBuffering
@@ -24,7 +27,7 @@ main = do
 	[]            -> printUsage >> printHelp
         ("-h":[])     -> printUsage >> printHelp
 	("--help":[]) -> printUsage >> printHelp
-	(dropDir:[])  -> resolve dropDir
+	(dropDir:[])  -> void $ resolve dropDir M.empty
 	otherwise     -> error $ "Invalid Arguments\n" ++ usage
 
 printUsage = putStrLn usage
@@ -55,25 +58,33 @@ printHelp = do
    putStrLn $ "   (H)elp          => By pressing 'H' or 'h', this help is printed."
    putStrLn $ ""
 
-resolve file = do
+type Resolved = M.Map String Int
+
+resolve :: String -> Resolved -> IO Resolved
+resolve file resolved = do
    dirExists <- doesDirectoryExist file
    if dirExists
       then do
 	 entries <- getDirContents file
-	 mapM_ (\e -> resolve $ file </> e) entries
+	 foldrM (\e r -> resolve (file </> e) r) resolved entries
       else do
 	 fileExists <- doesFileExist file
-	 when (fileExists && hasConflict file) $
-	    handleConflict file
+	 if fileExists && hasConflict file
+	    then do
+	       let confInfo = conflictInfo file
+		   key      = dir confInfo </> fileName confInfo
+	       if key `M.member` resolved
+		  then return resolved
+		  else do
+		     handleConflict confInfo
+		     return $ M.insert key 1 resolved
+	    else return resolved
 
 hasConflict file = "conflicted copy" `isInfixOf` file
 
-handleConflict file = do
-   exist <- doesFileExist file
-   when exist $ do
-      let confInfo = conflictInfo file
-      confFiles <- findConflicting confInfo
-      resolveConflict confInfo confFiles 
+handleConflict confInfo = do
+   confFiles <- findConflicting confInfo
+   resolveConflict confInfo confFiles 
 
    where
       findConflicting confInfo = do
