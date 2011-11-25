@@ -1,3 +1,6 @@
+
+DISCONTINUED! USE CONFSOLVE!
+
 Make and Install:
    cabal install --prefix=INSTALL_LOCATION dropsolve.cabal
 
